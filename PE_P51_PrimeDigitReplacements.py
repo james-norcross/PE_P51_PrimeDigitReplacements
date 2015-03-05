@@ -42,8 +42,8 @@ def listFromSieve(sieve):
 ## determines whether a number is an appropriate mask for creating a
 ## prime family.  Such a mask must contain only zeroes and one other digit (which
 ## may occur numerous times). 1 is not a valid mask and neither is all 1's.
-## number is integer, returns -1 if number is not
-## a valid mask, otherwise returns the reduced mask represented by number 
+## number is integer, returns -1 if difference and n1 are not valid mask pair, -2 if difference
+## is not a valid mask, otherwise returns the reduced mask for diff 
 def findMask(n1, n2):
 
     original = n1
@@ -115,16 +115,33 @@ maxNumber = 1000000
 isPrime = makePrimeSieve(maxNumber)
 primes = listFromSieve(isPrime)
 
-##n1 = 56993
-##n2 = 56773
-##a = findMask(n1,n2)
-##print a
-##print generateFamily(n1, a, isPrime)
+## create and initialize list to hold previous findMask results
+validMask =  []
+for i in range(0, maxNumber):
+    validMask.append(-1)
+
+
 for i in range(-1,-len(primes)-1, -1):
+    orderI = int(log10(primes[i]))
+    
     for j in range(i-1, -len(primes) - 1, -1):
+
+        if( (primes[i] > (7 * (10 ** orderI))) and (primes[j] < (7 * (10 ** orderI)))):
+            break
+
+        digit1PrimesI = int(primes[i]/10**orderI)
+        minimum = (digit1PrimesI + 0.7)*(10**(orderI-1))
+
+        if((primes[i] < (7*(10**orderI))) and (primes[j] < minimum)):
+            break
+
+        if(validMask[primes[i] - primes[j]] == -2):
+           break
         
         a = findMask(primes[i], primes[j])
-        if(a != -1):
+        validMask[primes[i] - primes[j]] = a
+           
+        if(a != -1 and a != -2):
             family = generateFamily(primes[i], a, isPrime)
             if(len(family) > 6):
                 print family
